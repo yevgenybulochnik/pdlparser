@@ -1,0 +1,16 @@
+{
+  "configurations": {
+    "run": {
+      "adapter": "debugpy",
+      "dafault": true,
+      "configuration": {
+        "request": "launch",
+        "program": "${file}",
+        "cwd": "${workspaceRoot}",
+        "python": "${VIRTUAL_ENV}/bin/python",
+        "stopOnEntry": true,
+        "justMyCode": true
+      }
+    }
+  }
+}
