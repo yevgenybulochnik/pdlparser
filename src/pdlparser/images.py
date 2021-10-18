@@ -143,6 +143,8 @@ def parse_class_contours(outer_rects, inner_rects):
         class_group = {
             'left': [],
             'right': [],
+            'header': None,
+            'content_box': None,
         }
 
         x, y, width, height = outer_rect
@@ -168,3 +170,50 @@ def parse_class_contours(outer_rects, inner_rects):
         class_groups.append(class_group)
 
     return class_groups
+
+
+def show_class_group(class_group, img_array):
+    """Given a class_group dictionary display outlines on img_array.
+
+    Args:
+        class_group: class_group dictionary
+        img_array: numpy array
+    Returns:
+        Returns image array
+    """
+
+    x, y, w, h = class_group['content_box']
+    cv2.rectangle(img_array, (x, y), (x+w, y+h), (255, 0, 0), 10)
+
+    x, y, w, h = class_group['header']
+    cv2.rectangle(img_array, (x, y), (x+w, y+h), (0, 0, 255), 10)
+
+    for left_rect in class_group['left']:
+        x, y, w, h = left_rect
+        cv2.rectangle(img_array, (x, y), (x+w, y+h), (0, 255, 0), 10)
+
+    for right_rect in class_group['right']:
+        x, y, w, h = right_rect
+        cv2.rectangle(img_array, (x, y), (x+w, y+h), (165, 42, 42), 10)
+
+    return img_array
+
+
+def show_class_groups(class_groups, img):
+    """Given an array of class_group dictionaries display outlines on an
+    img_array
+
+    Args:
+        class_groups: array of class groups
+        img: PIL image object
+
+    Returns:
+        Returns image numpy array
+
+    """
+    img_array = np.array(img)
+
+    for class_group in class_groups:
+        show_class_group(class_group, img_array)
+
+    return img_array
