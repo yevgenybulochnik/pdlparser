@@ -73,3 +73,98 @@ def generate_vh_lines(img: Image) -> npt.NDArray:
     img_vh = cv2.cvtColor(img_vh, cv2.COLOR_BGR2GRAY)
 
     return img_vh
+
+
+def generate_contours(img: Image):
+    """Given a PIL image object generate contour lines.
+
+    Function will generate contours based on vertical and horizontal table
+    lines.
+
+    Args:
+        img: PIL image object
+
+    """
+    img_vh = generate_vh_lines(img)
+
+    contours, _ = cv2.findContours(
+        img_vh,
+        cv2.RETR_TREE,
+        cv2.CHAIN_APPROX_SIMPLE,
+    )
+
+    return contours
+
+
+def parse_contours(contours):
+    """Parse generated contours.
+
+    Function will parse generated contours into larger outer and inner
+    rectangles.
+
+    Args:
+        contours: array
+
+    """
+    outer_rects = []
+    inner_rects = []
+
+    for cnt in contours:
+        rect = cv2.boundingRect(cnt)
+        _, _, width, _ = rect
+
+        if width > 3300:
+            continue
+        if width > 3000:
+            outer_rects.append(rect)
+        else:
+            inner_rects.append(rect)
+
+    return outer_rects[::-1], inner_rects[::-1]
+
+
+def parse_class_contours(outer_rects, inner_rects):
+    """Parse contours into a class grouping.
+
+    This functions takes outer and inner rectangles and parses them into a
+    class datastructure to facilitate further parsing.
+
+    Args:
+        outer_rects: array
+        inner_rects: array
+
+    Returns:
+        Array of class group dictionaries
+    """
+
+    class_groups = []
+
+    for outer_rect in outer_rects:
+        class_group = {
+            'left': [],
+            'right': [],
+        }
+
+        x, y, width, height = outer_rect
+
+        for inner_rect in inner_rects:
+            inner_x, inner_y, _, _ = inner_rect
+
+            if y < inner_y < y + height:
+                class_group['content_box'] = outer_rect
+                header_rect = (
+                    x,
+                    y - 100,
+                    width,
+                    100
+                )
+                class_group['header'] = header_rect
+
+                if inner_x < 1500:
+                    class_group['left'].append(inner_rect)
+                else:
+                    class_group['right'].append(inner_rect)
+
+        class_groups.append(class_group)
+
+    return class_groups
