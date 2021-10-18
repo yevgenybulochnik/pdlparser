@@ -20,3 +20,23 @@ def generate_img_bin(img: Image) -> npt.NDArray:
     img_reversal = 255 - img_bin
 
     return img_reversal
+
+
+def generate_kernels(img_array: npt.NDArray):
+    """Given an binary image array generate a standard kernel, vertical kernal
+    and horizontal kernal.
+
+    Args:
+        img_array: numpy array (binary_image)
+    Returns:
+        Tuple including kernal, vertical kernal and horizontal kernal
+    """
+    kernel_len = img_array.shape[1] // 135
+
+    vert_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, kernel_len))
+
+    hori_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (kernel_len, 1))
+
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2, 2))
+
+    return kernel, vert_kernel, hori_kernel
