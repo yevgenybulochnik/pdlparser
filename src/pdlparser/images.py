@@ -1,5 +1,6 @@
 from cv2 import cv2
 import numpy as np
+from pdlparser.extract import extract_set
 
 import numpy.typing as npt
 from PIL.Image import Image
@@ -170,6 +171,30 @@ def parse_class_contours(outer_rects, inner_rects):
         class_groups.append(class_group)
 
     return class_groups
+
+
+def get_data(img: Image):
+    """Given an image get all data from table structures.
+
+    This functions combines multiple methods to parse an image, determine its
+    table structure and extract all data from said tables.
+
+    Args:
+        img: PIL image object
+
+    """
+    contours = generate_contours(img)
+    outer_rect, inner_rect = parse_contours(contours)
+    class_groups = parse_class_contours(outer_rect, inner_rect)
+
+    data = []
+
+    for class_group in class_groups:
+        class_data = extract_set(np.array(img), class_group)
+
+        data.append(class_data)
+
+    return data
 
 
 def show_class_group(class_group, img_array):
