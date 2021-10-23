@@ -1,4 +1,5 @@
 import tempfile
+import pandas as pd
 import numpy as np
 from pdf2image import convert_from_path
 from PIL import Image
@@ -72,3 +73,42 @@ def parse_pdl(pdf_path: Union[str, Path]):
         final_data.append(datum)
 
     return final_data
+
+
+def generate_df(data):
+    """Given parsed data from a PDF return a pandas dataframe
+
+    This function takes the result of of parse_pdl and returns a pandas
+    dataframe
+
+    Args:
+        data: Array of class_group objects
+
+    Returns:
+        Pandas dataframe
+    """
+
+    dfs = []
+
+    for class_set in data:
+        header = class_set['header'][0]
+        preferred = class_set['preferred']
+        non_preferred = class_set['non-preferred']
+
+        preferred_df = pd.DataFrame({
+            'class': header,
+            'status': 'preferred',
+            'drug_label': preferred,
+        })
+
+        non_preferred_df = pd.DataFrame({
+            'class': class_set['header'][0],
+            'status': 'non-preferred',
+            'drug_label': non_preferred,
+        })
+
+        dfs.append(
+            pd.concat([preferred_df, non_preferred_df])
+        )
+
+    return pd.concat(dfs)
